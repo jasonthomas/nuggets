@@ -12,6 +12,11 @@ if not connections:  # don't set this repeatedly
     for alias, backend in settings.REDIS_BACKENDS.items():
         _, server, params = parse_backend_uri(backend)
 
+        db = params.pop('db', 1)
+        try:
+            db = int(db)
+        except (ValueError, TypeError):
+            db = 1
         try:
             socket_timeout = float(params.pop('socket_timeout'))
         except (KeyError, ValueError):
@@ -27,7 +32,7 @@ if not connections:  # don't set this repeatedly
             host = 'localhost'
             port = 6379
 
-        connections[alias] = redislib.Redis(host=host, port=port, db=0,
+        connections[alias] = redislib.Redis(host=host, port=port, db=db,
                                             password=password,
                                             socket_timeout=socket_timeout)
 
